@@ -8,8 +8,11 @@ from sklearn.metrics import confusion_matrix, roc_curve, auc
 import plotly.graph_objects as go
 
 
-def generate_confusion_matrix_fig(cm: dict, title="Confusion Matrix") -> bytes:
-    matrix = [[cm["tn"], cm["fp"]], [cm["fn"], cm["tp"]]]
+def generate_confusion_matrix_fig(cm, title="Confusion Matrix") -> bytes:
+    if isinstance(cm, dict):
+        matrix = [[cm["tn"], cm["fp"]], [cm["fn"], cm["tp"]]]
+    else:
+        matrix = cm
     fig, ax = plt.subplots(figsize=(4, 3.5))
     sns.heatmap(matrix, annot=True, fmt="d", cmap="Blues",
                 xticklabels=["Pred BENIGN", "Pred MALIGNANT"],
