@@ -4,17 +4,14 @@ from pathlib import Path
 
 logger = logging.getLogger("download_models")
 
-HF_REPO_ID = os.getenv("HF_REPO_ID", "usuario/tu-repo-aqui")
+HF_REPO_ID = os.getenv("HF_REPO_ID", "Jijiploff/cr-mama-fn-models")
 HF_TOKEN = os.getenv("HF_TOKEN", None)
 
 MODEL_FILES = [
-    "cnn_efficientnet_20260707_061411.keras",
-    "ensemble_20260707_061411.keras",
-    "hybrid_cnn_rf_extractor_20260713_130540.keras",
-    "hybrid_cnn_rf_classifier_20260713_130540.pkl",
-    "tabular_20260707_061411.pkl",
-    "rf_tabular_20260713_130540.pkl",
-    "best_cnn_efficientnet.h5",
+    "tabular_rf_20260720_125151.pkl",
+    "cnn_efficientnet_20260720_125151.keras",
+    "extractor_hibrid_rf_cnn.keras",
+    "classifier_hibrid_rf_cnn.pkl",
 ]
 
 

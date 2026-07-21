@@ -15,6 +15,8 @@ RESULTS_DIR = Path(os.getenv("TRAINING_RESULTS_DIR", str(BASE_DIR / "data" / "re
 RESULTS_FIGURES_DIR = RESULTS_DIR / "figures"
 RESULTS_SUMMARIES_DIR = RESULTS_DIR / "summaries"
 FALLBACK_MODELS_DIR = MODELS_DIR
+IMAGES_DIR = Path(os.getenv("TRAINING_IMAGES_DIR", str(BASE_DIR / "data" / "images")))
+DATABASE_DIR = Path(os.getenv("TRAINING_DATABASE_DIR", str(BASE_DIR / "data" / "database")))
 
 JSON_RESULTS_PATH = RESULTS_DIR / "modelos_cv_tuning.json"
 PIPELINE_RESULTS_PATH = RESULTS_DIR / "summaries" / "resumen_pipeline_latest.json"

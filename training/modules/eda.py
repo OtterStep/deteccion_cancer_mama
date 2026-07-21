@@ -26,12 +26,17 @@ class BreastCancerEDA:
             self.database_path = Path(database_path) if database_path else _base / "Database"
             self.results_path = Path(results_path) if results_path else _base / "Resultados"
         else:
-            from config import DATA_DIR, IMAGES_DIR, TABULAR_DIR, DATABASE_DIR, RESULTS_DIR
+            from config import DATA_DIR, TABULAR_DIR, RESULTS_DIR
             self.csv_path = Path(csv_path or DATA_DIR)
-            self.images_path = Path(images_path or IMAGES_DIR)
             self.tabular_path = Path(tabular_path or TABULAR_DIR)
-            self.database_path = Path(database_path or DATABASE_DIR)
             self.results_path = Path(results_path or RESULTS_DIR)
+            try:
+                from config import IMAGES_DIR, DATABASE_DIR
+            except ImportError:
+                IMAGES_DIR = self.csv_path.parent / "images"
+                DATABASE_DIR = self.csv_path.parent / "database"
+            self.images_path = Path(images_path or IMAGES_DIR)
+            self.database_path = Path(database_path or DATABASE_DIR)
             self.base_path = self.csv_path.parent
 
         self.results_path.mkdir(exist_ok=True)

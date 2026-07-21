@@ -1,8 +1,14 @@
+import logging
+import os
+
 import streamlit as st
 
 from modules.auth import require_auth, logout, check_auth
 from modules.i18n import get_translation
-from config import APP_ICON, BASE_DIR
+from config import APP_ICON, BASE_DIR, MODELS_DIR
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app")
 
 # Initialize session state
 if "language" not in st.session_state:
@@ -191,6 +197,22 @@ def apply_theme(theme: str):
 apply_theme(st.session_state.theme)
 
 require_auth()
+
+# ── Descargar modelos desde HuggingFace si está configurado ──
+if "models_downloaded" not in st.session_state:
+    hf_repo = os.getenv("HF_REPO_ID", "")
+    if hf_repo:
+        from download_models import download_models
+        logger.info(f"HF_REPO_ID={hf_repo}. Descargando modelos...")
+        with st.spinner("Descargando modelos desde HuggingFace Hub..."):
+            ok = download_models(MODELS_DIR)
+            if ok:
+                st.sidebar.success("Modelos descargados correctamente.")
+            else:
+                st.sidebar.warning("Algunos modelos no pudieron descargarse. Verifica HF_TOKEN si el repo es privado.")
+    else:
+        logger.info("HF_REPO_ID no configurado. Usando modelos locales si existen.")
+    st.session_state["models_downloaded"] = True
 
 # Sidebar header
 st.sidebar.markdown(
