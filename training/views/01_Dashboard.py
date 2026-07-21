@@ -17,8 +17,8 @@ MODEL_CATEGORIES = [
     ("Ensemble (CNN+Clínico)", ["ensemble_"], [".keras"]),
     ("Hybrid CNN-RF Extractor", ["extractor_hibrid_rf_cnn", "hybrid_cnn_rf_extractor_"], [".keras"]),
     ("Hybrid CNN-RF Classifier", ["classifier_hibrid_rf_cnn", "hybrid_cnn_rf_classifier_"], [".pkl"]),
-    ("Tabular (XGBoost)", ["tabular_xgboost_", "tabular_"], [".pkl"]),
     ("Tabular (RF)", ["tabular_rf_", "rf_tabular_"], [".pkl"]),
+    ("Tabular (XGBoost)", ["tabular_xgboost_"], [".pkl"]),
 ]
 
 
@@ -85,11 +85,18 @@ for f in model_files:
     t = get_model_type(f.name)
     model_types.setdefault(t, set()).add(f.name)
 
+trained = data.get("fase2_modelado", {}).get("modelos_entrenados", [])
+trained_count = len(trained) if trained else 0
 unique_types = len(model_types)
 total_models = len(model_files)
+label = (
+    f"{trained_count} entrenados ({total_models} descargados, {unique_types} tipos)"
+    if trained_count
+    else f"{total_models} ({unique_types} {get_translation(lang, 'dashboard.total_models_sub')})"
+)
 col2.metric(
     get_translation(lang, "dashboard.total_models"),
-    f"{total_models} ({unique_types} {get_translation(lang, 'dashboard.total_models_sub')})",
+    label,
 )
 
 if data:
