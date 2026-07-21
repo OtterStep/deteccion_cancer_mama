@@ -112,12 +112,20 @@ if data:
     if mejor:
         tabla = data.get("ranking_modelos", {}).get("tabla", [])
         if tabla:
+            modelo_map = {
+                "tabular_xgboost": "XGBoost",
+                "tabular_rf": "Random Forest",
+                "cnn_efficientnet": "CNN",
+                "hybrid_cnn_rf": "CNN+RF",
+                "hybrid_cnn_xgb": "CNN+XGBoost",
+            }
+            modelo_nombre = modelo_map.get(mejor, mejor)
+            score = tabla[0].get("Score compuesto", 0)
+            auc = tabla[0].get("auc", 0)
+            acc = tabla[0].get("accuracy", 0)
             st.success(
-                f"🏆 **Mejor modelo:** {dict(zip(['tabular_xgboost','tabular_rf','cnn_efficientnet','hybrid_cnn_rf','hybrid_cnn_xgb'],
-                ['XGBoost','Random Forest','CNN','CNN+RF','CNN+XGBoost'])).get(mejor, mejor)} — "
-                f"Score Compuesto: **{tabla[0].get('Score compuesto', 0):.4f}** | "
-                f"AUC: **{tabla[0].get('auc', 0):.4f}** | "
-                f"Accuracy: **{tabla[0].get('accuracy', 0):.4f}**"
+                f"Mejor modelo: {modelo_nombre} - "
+                f"Score Compuesto: {score:.4f} | AUC: {auc:.4f} | Accuracy: {acc:.4f}"
             )
 else:
     wis_path = TABULAR_DIR / "data.csv"
