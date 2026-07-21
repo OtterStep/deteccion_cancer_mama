@@ -2,7 +2,7 @@ import streamlit as st
 
 from modules.auth import require_auth, logout, check_auth
 from modules.i18n import get_translation
-from config import APP_ICON
+from config import APP_ICON, BASE_DIR
 
 # Initialize session state
 if "language" not in st.session_state:
@@ -248,8 +248,8 @@ if check_auth():
 
     if page_file and page_file in PAGES.values():
         try:
-            exec(open(page_file, encoding="utf-8").read())
+            exec(open(BASE_DIR / page_file, encoding="utf-8").read())
         except Exception as e:
             st.error(f"Error al cargar la página: {e}")
     else:
-        exec(open("views/01_Dashboard.py", encoding="utf-8").read())
+        exec(open(BASE_DIR / "views/01_Dashboard.py", encoding="utf-8").read())
