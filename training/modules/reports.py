@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch, mm
+from reportlab.lib.units import cm, inch, mm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle,
@@ -30,7 +30,6 @@ def generate_pdf(
     doc = SimpleDocTemplate(output_path, pagesize=A4,
                             rightMargin=2*cm, leftMargin=2*cm,
                             topMargin=2*cm, bottomMargin=2*cm)
-    cm = mm * 10
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="CenterTitle", parent=styles["Title"],
                                alignment=TA_CENTER, fontSize=18, spaceAfter=20))
