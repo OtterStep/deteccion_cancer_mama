@@ -24,9 +24,6 @@ def mcnemar_test(y_true, y_pred_model1, y_pred_model2):
         return {"statistic": 0.0, "p_value": 1.0, "note": "Modelos idénticos"}
 
     statistic = (abs(b - c) - 1) ** 2 / (b + c)
-    p_value = 1 - chi2_contingency([[0, b], [c, 0]], correction=False)[1]
-    p_value = 1.0 - (1.0 - chi2_contingency([[b, 0], [0, c]], correction=False)[1])
-
     from scipy.stats import chi2
     p_value = 1 - chi2.cdf(statistic, 1)
 
