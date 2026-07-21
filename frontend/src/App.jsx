@@ -127,7 +127,8 @@ export default function App() {
       return copy
     })
   }
-
+  
+  /*
   if (page === 'login') {
     return (
       <>
@@ -144,7 +145,7 @@ export default function App() {
         <HelpChatbot />
       </>
     )
-  }
+  }*/
 
   return (
     <div className="min-h-screen bg-bg font-body text-ink">
