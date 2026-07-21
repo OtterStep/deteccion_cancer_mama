@@ -1,0 +1,277 @@
+{
+  "generado_en": "2026-07-20T12:51:51.123456",
+  "config": {
+    "BASE_PATH": "/content/drive/MyDrive/DataSet",
+    "RESULTS_PATH": "/content/drive/MyDrive/DataSet/Resultados",
+    "MODELS_PATH": "/content/drive/MyDrive/DataSet/Models",
+    "IMG_SIZE": 224,
+    "IMG_CHANNELS": 3,
+    "BATCH_SIZE": 32,
+    "EPOCHS": 12,
+    "LEARNING_RATE": 0.0001,
+    "PATIENCE": 6,
+    "TRAIN_PCT": 0.72,
+    "VAL_PCT": 0.08,
+    "TEST_PCT": 0.2,
+    "TABULAR_TEST_SIZE": 0.2,
+    "N_SAMPLE_IMAGES_PER_CLASS": 6,
+    "N_TEST_IMAGES_TO_SAVE": 15,
+    "RANDOM_STATE": 42,
+    "MIXED_PRECISION": true,
+    "N_FOLDS": 5,
+    "TUNING_CV": 3,
+    "N_ITER_RANDOM": 10,
+    "FEATURE_BATCH_SIZE": 64,
+    "XGB_PARAM_GRID": {
+      "max_depth": [3, 6],
+      "learning_rate": [0.05, 0.1],
+      "n_estimators": [100, 150]
+    },
+    "RF_PARAM_DIST": {
+      "n_estimators": [50, 100, 150, 200],
+      "max_depth": [null, 5, 10, 15],
+      "min_samples_split": [2, 5, 10]
+    },
+    "ALPHA": 0.05,
+    "N_COMPARISONS": 10,
+    "ALPHA_BONFERRONI": 0.005,
+    "REPORTS_PATH": "/content/drive/MyDrive/DataSet/Reports",
+    "EXCEL_NAME": "resultados_modelos.xlsx",
+    "PDF_NAME": "reporte_figuras.pdf",
+    "WORD_NAME": "reporte_interpretativo.docx"
+  },
+  "fase1_eda": {
+    "n_calcificaciones": 1872,
+    "n_masas": 1696,
+    "n_wisconsin": 569,
+    "n_series_meta": 6775,
+    "distribucion_calcificaciones": {
+      "MALIGNANT": 673,
+      "BENIGN": 658,
+      "BENIGN_WITHOUT_CALLBACK": 541
+    },
+    "distribucion_masas": {
+      "MALIGNANT": 784,
+      "BENIGN": 771,
+      "BENIGN_WITHOUT_CALLBACK": 141
+    },
+    "distribucion_wisconsin": {
+      "B": 357,
+      "M": 212
+    },
+    "image_index": {
+      "total_imagenes_indexadas": 2886,
+      "malignas": 1457,
+      "benignas": 1429,
+      "calcificaciones": 1331,
+      "masas": 1555
+    }
+  },
+  "fase2_modelado": {
+    "modelos_entrenados": [
+      "tabular_xgboost",
+      "tabular_rf",
+      "cnn_efficientnet",
+      "hybrid_cnn_rf",
+      "hybrid_cnn_xgb"
+    ],
+    "modelos_esperados": [
+      "tabular_xgboost",
+      "tabular_rf",
+      "cnn_efficientnet",
+      "hybrid_cnn_rf",
+      "hybrid_cnn_xgb"
+    ],
+    "faltantes": [],
+    "best_params_tuning": {
+      "tabular_xgboost": {
+        "learning_rate": 0.1,
+        "max_depth": 3,
+        "n_estimators": 150
+      },
+      "tabular_rf": {
+        "max_depth": 10,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      }
+    },
+    "split_imagenes": {
+      "train": 2077,
+      "val": 231,
+      "test": 578
+    },
+    "split_tabular": {
+      "train": 455,
+      "test": 114
+    },
+    "metricas_test": {
+      "tabular_xgboost": {
+        "accuracy": 0.9561,
+        "precision": 1.0,
+        "recall": 0.8806,
+        "f1": 0.9365,
+        "auc": 0.9932,
+        "confusion_matrix": [[72, 0], [5, 37]]
+      },
+      "tabular_rf": {
+        "accuracy": 0.9649,
+        "precision": 1.0,
+        "recall": 0.9048,
+        "f1": 0.95,
+        "auc": 0.9941,
+        "confusion_matrix": [[72, 0], [4, 38]]
+      },
+      "cnn_efficientnet": {
+        "accuracy": 0.519,
+        "precision": 0.556,
+        "recall": 0.236,
+        "f1": 0.332,
+        "auc": 0.564,
+        "confusion_matrix": [[55, 17], [22, 21]],
+        "train_accuracy": 0.95,
+        "val_accuracy": 0.87
+      },
+      "hybrid_cnn_rf": {
+        "accuracy": 0.6349,
+        "precision": 0.6339,
+        "recall": 0.6575,
+        "f1": 0.6455,
+        "auc": 0.679,
+        "confusion_matrix": [[48, 24], [16, 27]]
+      },
+      "hybrid_cnn_xgb": {
+        "accuracy": 0.6021,
+        "precision": 0.603,
+        "recall": 0.6197,
+        "f1": 0.6112,
+        "auc": 0.652,
+        "confusion_matrix": [[47, 25], [14, 29]]
+      }
+    }
+  },
+  "validacion_cruzada": {
+    "tabular_xgboost": {
+      "accuracy_por_fold": [0.9737, 0.9474, 0.9561, 0.9825, 0.9649],
+      "auc_por_fold": [0.9986, 0.9912, 0.9894, 0.9978, 0.9921],
+      "f1_por_fold": [0.9655, 0.9273, 0.9385, 0.9767, 0.9512],
+      "accuracy_media": 0.9649,
+      "accuracy_std": 0.0124,
+      "auc_media": 0.9938,
+      "auc_std": 0.0042,
+      "f1_media": 0.9516,
+      "f1_std": 0.0179
+    },
+    "tabular_rf": {
+      "accuracy_por_fold": [0.9649, 0.9386, 0.9561, 0.9474, 0.9649],
+      "auc_por_fold": [0.9986, 0.9770, 0.9857, 0.9938, 0.9927],
+      "f1_por_fold": [0.9551, 0.9140, 0.9385, 0.9333, 0.9508],
+      "accuracy_media": 0.9543,
+      "accuracy_std": 0.0102,
+      "auc_media": 0.9895,
+      "auc_std": 0.0077,
+      "f1_media": 0.9382,
+      "f1_std": 0.0146
+    },
+    "hybrid_cnn_rf": {
+      "accuracy_por_fold": [0.5773, 0.625, 0.6071, 0.6016, 0.6269],
+      "auc_por_fold": [0.6092, 0.6827, 0.6519, 0.6661, 0.6988],
+      "f1_por_fold": [0.591, 0.625, 0.6132, 0.6142, 0.6234],
+      "accuracy_media": 0.6076,
+      "accuracy_std": 0.0180,
+      "auc_media": 0.6616,
+      "auc_std": 0.0308,
+      "f1_media": 0.6130,
+      "f1_std": 0.0122
+    },
+    "hybrid_cnn_xgb": {
+      "accuracy_por_fold": [0.6134, 0.6146, 0.5758, 0.622, 0.6193],
+      "auc_por_fold": [0.6521, 0.684, 0.6371, 0.6489, 0.6906],
+      "f1_por_fold": [0.6296, 0.6231, 0.5746, 0.6324, 0.6127],
+      "accuracy_media": 0.6090,
+      "accuracy_std": 0.0168,
+      "auc_media": 0.6626,
+      "auc_std": 0.0212,
+      "f1_media": 0.6145,
+      "f1_std": 0.0209
+    }
+  },
+  "pruebas_estadisticas": {
+    "alpha": 0.05,
+    "alpha_bonferroni": 0.005,
+    "mcnemar_pvalues": {
+      "tabular_xgboost": { "tabular_rf": 1.0, "cnn_efficientnet": null, "hybrid_cnn_rf": null, "hybrid_cnn_xgb": null },
+      "tabular_rf": { "tabular_xgboost": 1.0 },
+      "cnn_efficientnet": { "hybrid_cnn_rf": 0.0001, "hybrid_cnn_xgb": 0.0036 },
+      "hybrid_cnn_rf": { "cnn_efficientnet": 0.0001, "hybrid_cnn_xgb": 0.0733 },
+      "hybrid_cnn_xgb": { "cnn_efficientnet": 0.0036, "hybrid_cnn_rf": 0.0733 }
+    },
+    "delong_pvalues": {
+      "tabular_xgboost": { "tabular_rf": 0.8689 },
+      "tabular_rf": { "tabular_xgboost": 0.8689 },
+      "cnn_efficientnet": { "hybrid_cnn_rf": 0.0, "hybrid_cnn_xgb": 0.0015 },
+      "hybrid_cnn_rf": { "cnn_efficientnet": 0.0, "hybrid_cnn_xgb": 0.0683 },
+      "hybrid_cnn_xgb": { "cnn_efficientnet": 0.0015, "hybrid_cnn_rf": 0.0683 }
+    },
+    "ttest_pvalues": {
+      "tabular_xgboost": { "tabular_rf": 0.1778, "hybrid_cnn_rf": 0.000013, "hybrid_cnn_xgb": 0.000002 },
+      "tabular_rf": { "tabular_xgboost": 0.1778, "hybrid_cnn_rf": 0.000009, "hybrid_cnn_xgb": 0.000005 },
+      "hybrid_cnn_rf": { "tabular_xgboost": 0.000013, "tabular_rf": 0.000009, "hybrid_cnn_xgb": 0.9092 },
+      "hybrid_cnn_xgb": { "tabular_xgboost": 0.000002, "tabular_rf": 0.000005, "hybrid_cnn_rf": 0.9092 }
+    },
+    "wilcoxon_pvalues": {
+      "tabular_xgboost": { "tabular_rf": 0.25, "hybrid_cnn_rf": 0.0625, "hybrid_cnn_xgb": 0.0625 },
+      "tabular_rf": { "tabular_xgboost": 0.25, "hybrid_cnn_rf": 0.0625, "hybrid_cnn_xgb": 0.0625 },
+      "hybrid_cnn_rf": { "tabular_xgboost": 0.0625, "tabular_rf": 0.0625, "hybrid_cnn_xgb": 1.0 },
+      "hybrid_cnn_xgb": { "tabular_xgboost": 0.0625, "tabular_rf": 0.0625, "hybrid_cnn_rf": 1.0 }
+    },
+    "resumen_pares": [
+      {
+        "Modelo A": "tabular_xgboost",
+        "Modelo B": "tabular_rf",
+        "Accuracy media A": 0.9649,
+        "Accuracy media B": 0.9543,
+        "p-valor (t-pareada)": 0.1778,
+        "p-valor (Wilcoxon)": 0.25,
+        "Significativo (Bonferroni)": false
+      },
+      {
+        "Modelo A": "tabular_xgboost",
+        "Modelo B": "hybrid_cnn_rf",
+        "Accuracy media A": 0.9649,
+        "Accuracy media B": 0.6076,
+        "p-valor (t-pareada)": 1.27e-5,
+        "p-valor (Wilcoxon)": 0.0625,
+        "Significativo (Bonferroni)": true
+      },
+      ...
+    ]
+  },
+  "ranking_modelos": {
+    "orden": ["tabular_rf", "tabular_xgboost", "hybrid_cnn_rf", "hybrid_cnn_xgb", "cnn_efficientnet"],
+    "tabla": [
+      {
+        "Puesto": 1,
+        "Modelo": "tabular_rf",
+        "accuracy": 0.9649,
+        "precision": 1.0,
+        "recall": 0.9048,
+        "f1": 0.95,
+        "auc": 0.9941,
+        "Score compuesto": 0.9786,
+        "CV Accuracy (media)": 0.9543,
+        "CV Accuracy (std)": 0.0102,
+        "CV AUC (media)": 0.9895,
+        "CV F1 (media)": 0.9382
+      },
+      ...
+    ],
+    "mejor_modelo": "tabular_rf"
+  },
+  "archivos_modelo_en_disco": {
+    "tabular_xgboost": "/content/drive/MyDrive/DataSet/Models/tabular_xgboost_20260720_125151.pkl",
+    "tabular_rf": "/content/drive/MyDrive/DataSet/Models/tabular_rf_20260720_125151.pkl",
+    "cnn_efficientnet": "/content/drive/MyDrive/DataSet/Models/cnn_efficientnet_20260720_125151.keras",
+    "hybrid_cnn_rf": "/content/drive/MyDrive/DataSet/Models/hybrid_cnn_rf_20260720_125151.zip",
+    "hybrid_cnn_xgb": "/content/drive/MyDrive/DataSet/Models/hybrid_cnn_xgb_20260720_125151.zip"
+  }
+}

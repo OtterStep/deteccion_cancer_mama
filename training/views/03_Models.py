@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from config import MODELS_DIR, JSON_RESULTS_PATH, RESULTS_DIR
+from config import MODELS_DIR, JSON_RESULTS_PATH, RESULTS_DIR, RESULTS_FIGURES_DIR
 from modules.i18n import get_translation
 
 
@@ -95,10 +95,27 @@ if data and "fase2_modelado" in data:
     fig.update_layout(height=450, yaxis_range=[0, 1.05], margin=dict(t=20))
     fig.update_traces(textposition="outside", textfont_size=9)
     st.plotly_chart(fig, use_container_width=True)
+    st.info(
+        "**Interpretación de la comparación de métricas:**  \n"
+        "Los modelos **tabulares** (Random Forest y XGBoost) superan significativamente a los modelos "
+        "basados en imagen, con Accuracy > 95% frente a ~60% de los híbridos y 52% de CNN.  \n"
+        "**Random Forest** es el mejor modelo general con Score Compuesto de **0.979** "
+        "(AUC = 0.994, F1 = 0.950).  \n"
+        "**CNN (EfficientNet)** muestra el rendimiento más bajo (AUC = 0.56), lo que refleja la "
+        "dificultad de clasificar mamografías completas sin segmentación previa de las regiones de interés.  \n"
+        "Los modelos **híbridos (CNN+RF y CNN+XGBoost)** mejoran ligeramente respecto a CNN pura, "
+        "pero no alcanzan el rendimiento de los modelos tabulares, lo que sugiere que las características "
+        "extraídas por CNN aún no capturan información suficientemente discriminativa."
+    )
 
     # Ranking
     if ranking and "tabla" in ranking:
         st.subheader("🏆 Ranking de Modelos")
+
+        ranking_png = RESULTS_FIGURES_DIR / "ranking_modelos.png"
+        if ranking_png.exists():
+            st.image(str(ranking_png), caption="Ranking de modelos generado durante el entrenamiento en Colab", use_container_width=True)
+
         rank_df = pd.DataFrame(ranking["tabla"])
         display_rank = rank_df[
             ["Puesto", "Modelo", "accuracy", "precision", "recall", "f1", "auc", "Score compuesto"]
@@ -113,16 +130,40 @@ if data and "fase2_modelado" in data:
 
     # Matrices de confusión (tabla manual)
     st.subheader("📋 Matrices de Confusión")
+    st.caption(
+        "VP = Verdaderos Positivos (BENIGN correctos), VN = Verdaderos Negativos (MALIGNANT correctos), "
+        "FP = Falsos Positivos, FN = Falsos Negativos."
+    )
     for model_key, m in metricas.items():
         cm = m.get("confusion_matrix", {})
         if cm:
             st.markdown(f"**{format_model_name(model_key)}**")
-            cm_df = pd.DataFrame(
-                [[cm.get("tn", 0), cm.get("fp", 0)], [cm.get("fn", 0), cm.get("tp", 0)]],
-                index=["Real: BENIGN", "Real: MALIGNANT"],
-                columns=["Pred: BENIGN", "Pred: MALIGNANT"],
-            )
+            if isinstance(cm, dict):
+                cm_df = pd.DataFrame(
+                    [[cm.get("tn", 0), cm.get("fp", 0)], [cm.get("fn", 0), cm.get("tp", 0)]],
+                    index=["Real: BENIGN", "Real: MALIGNANT"],
+                    columns=["Pred: BENIGN", "Pred: MALIGNANT"],
+                )
+            else:
+                cm_arr = cm
+                cm_df = pd.DataFrame(
+                    cm_arr,
+                    index=["Real: BENIGN", "Real: MALIGNANT"],
+                    columns=["Pred: BENIGN", "Pred: MALIGNANT"],
+                )
             st.dataframe(cm_df, use_container_width=True)
+            tp = cm_arr[1][1] if isinstance(cm, list) else cm.get("tp", 0)
+            fp = cm_arr[0][1] if isinstance(cm, list) else cm.get("fp", 0)
+            fn = cm_arr[1][0] if isinstance(cm, list) else cm.get("fn", 0)
+            tn = cm_arr[0][0] if isinstance(cm, list) else cm.get("tn", 0)
+            total = tp + fp + fn + tn
+            acc = (tp + tn) / total if total > 0 else 0
+            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            st.markdown(
+                f"Precisión: **{acc:.1%}** | Sensibilidad: **{sensitivity:.1%}** | "
+                f"Especificidad: **{specificity:.1%}**"
+            )
 
 else:
     st.info("No se encontraron métricas de modelos entrenados en el archivo de resultados.")

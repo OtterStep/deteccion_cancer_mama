@@ -1,0 +1,30 @@
+REPORTE DE ANÁLISIS EXPLORATORIO - DETECCIÓN CÁNCER DE MAMA
+======================================================================
+Fecha: 2026-07-20 23:50:37
+
+1. DATASET CBIS-DDSM (IMÁGENES MÉDICAS)
+----------------------------------------
+   • Calcificaciones: 1872 casos
+   • Masas: 1696 casos
+   • Total casos: 3568
+   • Calcificaciones Malignas: 673
+   • Calcificaciones Benignas: 658
+   • Masas Malignas: 784
+   • Masas Benignas: 771
+
+2. DATASET WISCONSIN (DATOS TABULARES)
+----------------------------------------
+   • Total casos: 569
+   • Malignos: 212
+   • Benignos: 357
+
+3. ÍNDICE DE IMÁGENES CONSTRUIDO
+----------------------------------------
+   • Total imágenes indexadas con ruta real: 2886
+
+4. NOTA IMPORTANTE SOBRE LOS DATASETS
+----------------------------------------
+   CBIS-DDSM (imágenes) y Wisconsin (tabular) son datasets
+   INDEPENDIENTES: no comparten pacientes. Por eso los modelos
+   'hibridos' de este proyecto combinan dos algoritmos sobre UN
+   mismo dataset (imagenes), y no fusionan ambos datasets por caso.

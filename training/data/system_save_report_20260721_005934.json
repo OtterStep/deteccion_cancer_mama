@@ -1,0 +1,107 @@
+{
+  "timestamp": "20260721_005934",
+  "models_trained": [
+    "tabular_xgboost",
+    "tabular_rf",
+    "cnn_efficientnet",
+    "hybrid_cnn_rf",
+    "hybrid_cnn_xgb"
+  ],
+  "saved_paths": {
+    "tabular_xgboost": "/content/drive/MyDrive/DataSet/Models/tabular_xgboost_20260721_005934.pkl",
+    "tabular_rf": "/content/drive/MyDrive/DataSet/Models/tabular_rf_20260721_005934.pkl",
+    "cnn_efficientnet": "/content/drive/MyDrive/DataSet/Models/cnn_efficientnet_20260721_005934.keras",
+    "hybrid_cnn_rf": "/content/drive/MyDrive/DataSet/Models/hybrid_cnn_rf_20260721_005934.zip",
+    "hybrid_cnn_xgb": "/content/drive/MyDrive/DataSet/Models/hybrid_cnn_xgb_20260721_005934.zip",
+    "best_model": null
+  },
+  "model_results": {
+    "tabular_xgboost": {
+      "accuracy": 0.956140350877193,
+      "precision": 1.0,
+      "recall": 0.8809523809523809,
+      "f1": 0.9367088607594937,
+      "auc": 0.9933862433862434,
+      "confusion_matrix": [
+        [
+          72,
+          0
+        ],
+        [
+          5,
+          37
+        ]
+      ]
+    },
+    "tabular_rf": {
+      "accuracy": 0.9649122807017544,
+      "precision": 1.0,
+      "recall": 0.9047619047619048,
+      "f1": 0.95,
+      "auc": 0.994212962962963,
+      "confusion_matrix": [
+        [
+          72,
+          0
+        ],
+        [
+          4,
+          38
+        ]
+      ]
+    },
+    "cnn_efficientnet": {
+      "accuracy": 0.5190311418685121,
+      "precision": 0.5564516129032258,
+      "recall": 0.2363013698630137,
+      "f1": 0.3317307692307692,
+      "auc": 0.5644218794903726,
+      "confusion_matrix": [
+        [
+          231,
+          55
+        ],
+        [
+          223,
+          69
+        ]
+      ]
+    },
+    "hybrid_cnn_rf": {
+      "accuracy": 0.6349480968858131,
+      "precision": 0.6336633663366337,
+      "recall": 0.6575342465753424,
+      "f1": 0.6453781512605042,
+      "auc": 0.6786749209694415,
+      "confusion_matrix": [
+        [
+          175,
+          111
+        ],
+        [
+          100,
+          192
+        ]
+      ]
+    },
+    "hybrid_cnn_xgb": {
+      "accuracy": 0.6020761245674741,
+      "precision": 0.6033333333333334,
+      "recall": 0.6198630136986302,
+      "f1": 0.6114864864864865,
+      "auc": 0.6519123000287383,
+      "confusion_matrix": [
+        [
+          167,
+          119
+        ],
+        [
+          111,
+          181
+        ]
+      ]
+    }
+  },
+  "best_model": "tabular_rf",
+  "best_params": {}
+}

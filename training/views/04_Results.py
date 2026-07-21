@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-from config import JSON_RESULTS_PATH
+from config import JSON_RESULTS_PATH, RESULTS_FIGURES_DIR
 from modules.i18n import get_translation
 
 
@@ -85,6 +85,10 @@ for model_key, cv in cv_data.items():
             margin=dict(t=40),
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.caption(
+            "Cada grupo de barras muestra Accuracy, AUC y F1-Score en un fold específico. "
+            "Barras de altura similar indican consistencia entre folds."
+        )
 
         # Interpretación
         std_acc = cv.get("accuracy_std", 0)
@@ -143,6 +147,30 @@ fig2.update_layout(
     margin=dict(t=40),
 )
 st.plotly_chart(fig2, use_container_width=True)
+st.info(
+    "**Interpretación de la validación cruzada:**  \n"
+    "**Random Forest** y **XGBoost** muestran la menor desviación estándar en Accuracy (< 0.015), "
+    "lo que indica alta **estabilidad** entre los 5 folds.  \n"
+    "Los modelos **híbridos** presentan mayor variabilidad (±0.03), lo que sugiere que su rendimiento "
+    "depende más de la partición específica de los datos.  \n"
+    "Las diferencias entre modelos tabulares e híbridos son **estadísticamente significativas** "
+    "(p < 0.005, Bonferroni), confirmando que la brecha de rendimiento no es atribuible al azar.  \n"
+    "**CNN (EfficientNet)** no tiene datos de CV disponibles (no se ejecutó CV por limitaciones de GPU)."
+)
+
+# Figuras pre-generadas
+cv_bars = RESULTS_FIGURES_DIR / "cv_comparison_bars.png"
+cv_box = RESULTS_FIGURES_DIR / "cv_comparison_boxplots.png"
+if cv_bars.exists() or cv_box.exists():
+    st.divider()
+    st.subheader("📸 Figuras de Validación Cruzada (desde Colab)")
+    col_fig1, col_fig2 = st.columns(2)
+    if cv_bars.exists():
+        with col_fig1:
+            st.image(str(cv_bars), caption="Comparación de CV por modelo", use_container_width=True)
+    if cv_box.exists():
+        with col_fig2:
+            st.image(str(cv_box), caption="Boxplots de CV por modelo", use_container_width=True)
 
 # Ranking
 if ranking and "tabla" in ranking:

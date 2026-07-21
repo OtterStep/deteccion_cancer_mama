@@ -62,11 +62,13 @@ services:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: cancer_mama_2024
       DRIVE_BASE: /content/drive/MyDrive/DataSet
+      TRAINING_DATA_DIR: /app/data/CSVFiles
       TRAINING_MODELS_DIR: /app/models
-      TRAINING_RESULTS_DIR: /app/results
+      TRAINING_RESULTS_DIR: /app/data/resultados
     volumes:
       - ./backend/models:/app/models
-      - ./training/results:/app/results
+      - ./training/data/CSVFiles:/app/data/CSVFiles
+      - ./training/data/resultados:/app/data/resultados
     depends_on:
       backend:
         condition: service_healthy

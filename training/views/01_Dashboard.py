@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 
 from config import (
-    DATA_DIR, MODELS_DIR, TABULAR_DIR, RESULTS_DIR, JSON_RESULTS_PATH,
+    DATA_DIR, MODELS_DIR, TABULAR_DIR, RESULTS_DIR, RESULTS_FIGURES_DIR, JSON_RESULTS_PATH,
 )
 from modules.i18n import get_translation
 
@@ -99,6 +99,26 @@ if data:
     benign = wis.get("B", 0)
     col3.metric(get_translation(lang, "dashboard.wisconsin_cases"), total_wis)
     col4.metric(get_translation(lang, "dashboard.malignant_benign"), f"{malignant} / {benign}")
+
+    img_idx = data.get("fase1_eda", {}).get("image_index", {})
+    if img_idx:
+        st.info(
+            f"**Índice de imágenes CBIS-DDSM:** {img_idx.get('total_imagenes_indexadas', 0)} imágenes totales "
+            f"({img_idx.get('malignas', 0)} malignas, {img_idx.get('benignas', 0)} benignas) — "
+            f"{img_idx.get('calcificaciones', 0)} calcificaciones, {img_idx.get('masas', 0)} masas."
+        )
+
+    mejor = data.get("ranking_modelos", {}).get("mejor_modelo", "")
+    if mejor:
+        tabla = data.get("ranking_modelos", {}).get("tabla", [])
+        if tabla:
+            st.success(
+                f"🏆 **Mejor modelo:** {dict(zip(['tabular_xgboost','tabular_rf','cnn_efficientnet','hybrid_cnn_rf','hybrid_cnn_xgb'],
+                ['XGBoost','Random Forest','CNN','CNN+RF','CNN+XGBoost'])).get(mejor, mejor)} — "
+                f"Score Compuesto: **{tabla[0].get('Score compuesto', 0):.4f}** | "
+                f"AUC: **{tabla[0].get('auc', 0):.4f}** | "
+                f"Accuracy: **{tabla[0].get('accuracy', 0):.4f}**"
+            )
 else:
     wis_path = TABULAR_DIR / "data.csv"
     if wis_path.exists():

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from config import DATA_DIR, TABULAR_DIR, RESULTS_DIR
+from config import DATA_DIR, TABULAR_DIR, RESULTS_DIR, RESULTS_FIGURES_DIR
 from modules.eda import BreastCancerEDA
 from modules.i18n import get_translation
 
@@ -56,6 +56,10 @@ tab_summary, tab_dist, tab_corr, tab_features, tab_raw = st.tabs([
 with tab_summary:
     st.subheader(get_translation(lang, "eda.dataset_summary"))
 
+    pathology_png = RESULTS_FIGURES_DIR / "pathology_distribution.png"
+    if pathology_png.exists():
+        st.image(str(pathology_png), caption="Distribución de patologías por dataset (generado durante entrenamiento en Colab)", use_container_width=True)
+
     datasets = {
         get_translation(lang, "eda.cbis_ddsm_calc"): eda.calc_all,
         get_translation(lang, "eda.cbis_ddsm_mass"): eda.mass_all,
@@ -87,12 +91,45 @@ with tab_dist:
     if eda.is_loaded:
         st.subheader(get_translation(lang, "eda.pathology_distribution"))
         st.plotly_chart(eda.plot_pathology_distribution(), use_container_width=True)
+        st.info(
+            "**Interpretación de la distribución de patologías:**  \n"
+            "El dataset Wisconsin tiene 357 casos benignos (62.7%) frente a 212 malignos (37.3%), "
+            "lo que refleja un desbalance moderado hacia la clase benigna.  \n"
+            "En CBIS-DDSM, las **calcificaciones** se distribuyen en 673 malignas, 658 benignas y 541 "
+            "`BENIGN_WITHOUT_CALLBACK` (hallazgos benignos sin seguimiento).  \n"
+            "Las **masas** muestran 784 malignas, 771 benignas y 141 `BENIGN_WITHOUT_CALLBACK`.  \n"
+            "Este balance relativamente equitativo entre clases es favorable para el entrenamiento "
+            "de modelos, reduciendo el riesgo de sesgo hacia una clase dominante."
+        )
 
         st.subheader(get_translation(lang, "eda.birads_distribution"))
         st.plotly_chart(eda.plot_birads_distribution(), use_container_width=True)
+        st.info(
+            "**Interpretación BI-RADS:**  \n"
+            "La escala BI-RADS assessment va de 0 (incompleto) a 6 (biopsia probada).  \n"
+            "Valores más altos indican mayor sospecha de malignidad:  \n"
+            "- **0**: Se necesitan más imágenes  \n"
+            "- **1**: Negativo  \n"
+            "- **2**: Benigno  \n"
+            "- **3**: Probablemente benigno  \n"
+            "- **4**: Sospechoso (subcategorías 4A, 4B, 4C)  \n"
+            "- **5**: Altamente sospechoso  \n"
+            "- **6**: Biopsia positiva confirmada  \n"
+            "La distribución permite identificar qué categorías son más frecuentes en el dataset "
+            "y si existe suficiente representación de cada una para el entrenamiento."
+        )
 
         st.subheader(get_translation(lang, "eda.subtlety_distribution"))
         st.plotly_chart(eda.plot_subtlety_distribution(), use_container_width=True)
+        st.info(
+            "**Interpretación de Subtlety:**  \n"
+            "Subtlety mide qué tan sutil o evidente es el hallazgo en la mamografía, en una "
+            "escala de 1 (muy sutil, difícil de detectar) a 5 (muy evidente).  \n"
+            "Los hallazgos con subtlety baja (1-2) son clínicamente relevantes porque "
+            "representan casos donde incluso radiólogos expertos podrían tener dificultades.  \n"
+            "Una distribución sesgada hacia valores altos indicaría que el dataset contiene "
+            "principalmente casos evidentes, lo que podría no reflejar la complejidad de la práctica clínica real."
+        )
 
         st.subheader(get_translation(lang, "eda.stats_by_class"))
         stats_by_class = eda.get_wisconsin_stats_by_class()
@@ -125,9 +162,26 @@ with tab_features:
 
         st.markdown("**Boxplots**")
         st.plotly_chart(eda.plot_wisconsin_boxplots(n_features=n_features), use_container_width=True)
+        st.info(
+            "**Interpretación de boxplots:**  \n"
+            "Los boxplots comparan la distribución de cada característica entre las clases BENIGN y MALIGNANT.  \n"
+            "Las características donde las cajas no se solapan (o lo hacen mínimamente) son las más "
+            "discriminativas, como `radius_mean`, `perimeter_mean` y `area_mean`.  \n"
+            "Las características con alto solapamiento aportan menos poder predictivo individual, "
+            "aunque pueden ser útiles en combinación con otras."
+        )
 
         st.markdown(f"**{get_translation(lang, 'eda.histograms_by_class')}**")
         st.plotly_chart(eda.plot_feature_distributions(n_features=n_features), use_container_width=True)
+        st.info(
+            "**Interpretación de histogramas:**  \n"
+            "Los histogramas muestran la distribución de frecuencias de cada característica separada por clase.  \n"
+            "Idealmente, las curvas de BENIGN (verde) y MALIGNANT (rojo) deberían estar desplazadas entre sí, "
+            "indicando que la característica ayuda a separar las clases.  \n"
+            "Cuando ambas curvas se superponen casi por completo, la característica tiene baja capacidad "
+            "discriminativa por sí sola.  \n"
+            "Se puede ajustar el número de características a visualizar con el control deslizante."
+        )
     else:
         st.info(get_translation(lang, "eda.not_available_e"))
 

@@ -8,13 +8,16 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
-DATA_DIR = BASE_DIR / "data" / "CSVFiles"
-TABULAR_DIR = BASE_DIR / "data" / "CSVFiles"
-MODELS_DIR = BASE_DIR / "data" / "models"
-RESULTS_DIR = BASE_DIR / "data" / "resultados"
+DATA_DIR = Path(os.getenv("TRAINING_DATA_DIR", str(BASE_DIR / "data" / "CSVFiles")))
+TABULAR_DIR = DATA_DIR
+MODELS_DIR = Path(os.getenv("TRAINING_MODELS_DIR", str(BASE_DIR / "data" / "models")))
+RESULTS_DIR = Path(os.getenv("TRAINING_RESULTS_DIR", str(BASE_DIR / "data" / "resultados")))
+RESULTS_FIGURES_DIR = RESULTS_DIR / "figures"
+RESULTS_SUMMARIES_DIR = RESULTS_DIR / "summaries"
 FALLBACK_MODELS_DIR = MODELS_DIR
 
-JSON_RESULTS_PATH = BASE_DIR / "modelos_cv_tuning.json"
+JSON_RESULTS_PATH = RESULTS_DIR / "modelos_cv_tuning.json"
+PIPELINE_RESULTS_PATH = RESULTS_DIR / "summaries" / "resumen_pipeline_latest.json"
 
 RANDOM_STATE = int(os.getenv("RANDOM_STATE", "42"))
 TEST_SIZE = float(os.getenv("TEST_SIZE", "0.2"))

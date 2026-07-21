@@ -1,0 +1,332 @@
+# INSTRUCCIONES: Generar/Actualizar Documentación del Sistema
+
+Usa este prompt con un LLM para generar o actualizar TODA la documentación del proyecto `deteccion_cancer_mama`.
+
+---
+
+## 1. CONTEXTO DEL SISTEMA
+
+### Descripción General
+Sistema web de apoyo diagnóstico para clasificación de mamografías (benigno vs maligno). Combina 3 capas: frontend React, backend FastAPI y dashboard de entrenamiento Streamlit.
+
+### Arquitectura en 3 Capas
+
+```
+USUARIO (Navegador)
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ FRONTEND (React 18 + Vite 5 + Tailwind 3)   │
+│ localhost:5173 (dev) / localhost:3000 (Docker)│
+│ Componentes: Login, Header, Hero, UploadPanel│
+│ ClinicalForm, ResultPanel, ConfidenceGauge,  │
+│ HistoryList, Dashboard, HelpChatbot, Footer, │
+│ Spinner, Tooltip                             │
+│ Hooks: useDarkMode, useHistory               │
+│ API: api.js (fetch wrapper)                  │
+└──────────────────────┬──────────────────────┘
+                       │ POST /predict, GET /health
+                       │ GET/DELETE /history, POST /auth/login
+                       │ GET /auth/me, GET /
+                       ▼
+┌─────────────────────────────────────────────┐
+│ BACKEND (FastAPI + Uvicorn)                  │
+│ localhost:8000                               │
+│ Endpoints: /predict, /health, /history,      │
+│   /auth/login, /auth/me, /                   │
+│ Seguridad: JWT, rate limiting (slowapi),     │
+│   CORS, validación uploads (security.py)     │
+│ Modelos: 5 modelos con consenso              │
+│   RF, XGBoost, CNN, CNN+RF, CNN+XGBoost     │
+│ Historial: deque en memoria (max 50)         │
+└──────┬───────────────────────────┬──────────┘
+       │                           │
+       ▼                           ▼
+┌──────────────┐        ┌──────────────────────┐
+│ Model Files   │        │ DASHBOARD ENTRENAM.  │
+│ backend/models│        │ (Streamlit) :8501    │
+│ .keras, .pkl  │        │ 7 vistas, 10 módulos │
+└──────────────┘        └──────────────────────┘
+```
+
+### Stack Tecnológico
+
+| Capa | Tecnologías |
+|------|-------------|
+| Backend | Python 3.10, FastAPI, Uvicorn, Pydantic, PyJWT, slowapi, TensorFlow/Keras, XGBoost, joblib, OpenCV, gdown |
+| Frontend | React 18, Vite 5, Tailwind CSS 3, JavaScript ES6+ |
+| Training | Python 3.10/3.11, Streamlit, Pandas, Plotly, scikit-learn, XGBoost, ReportLab, python-docx, openpyxl |
+| Infra | Docker, docker-compose, Nginx, GitHub Actions, Render (backend), Vercel (frontend), Google Drive (modelos) |
+
+### Los 5 Modelos del Sistema
+
+| # | Modelo | Tipo | Datos | Dónde se entrena |
+|---|--------|------|-------|-----------------|
+| 1 | **RF** | Random Forest | 30 características Wisconsin (tabulares) | Streamlit Dashboard o Colab |
+| 2 | **XGBoost** | XGBoost | 30 características Wisconsin (tabulares) | Streamlit Dashboard o Colab |
+| 3 | **CNN** | EfficientNet (Transfer Learning) | Mamografías 224×224 RGB | Google Colab (GPU) |
+| 4 | **CNN+RF** | Híbrido: CNN extractor + RF clasificador | Imagen + features extraídas por CNN | Google Colab (GPU) |
+| 5 | **CNN+XGBoost** | Híbrido: CNN extractor + XGBoost clasificador | Imagen + features extraídas por CNN | Google Colab (GPU) |
+
+**Cómo se usa en la API:**
+- `POST /predict` acepta: imagen (obligatorio) + 4 datos clínicos (assessment, subtlety, age, density) + 30 campos Wisconsin (opcional, con defaults).
+- La API ejecuta los 5 modelos disponibles.
+- Calcula consenso: `full_agreement` (todos coinciden), `majority` (mayoría), `disagreement` (sin acuerdo).
+- Si faltan datos clínicos, ciertos modelos muestran "N/D" (no disponibles).
+- RF se entrena localmente en Streamlit; CNN, CNN+RF y CNN+XGBoost se entrenan en Colab.
+
+### Datasets Utilizados
+- **CBIS-DDSM**: Mamografías (calcificaciones + masas) con metadatos DICOM. ~2.500 casos.
+- **Wisconsin Breast Cancer Diagnostic**: 569 casos, 30 características morfológicas del núcleo celular.
+
+---
+
+## 2. ARCHIVOS A GENERAR/ACTUALIZAR
+
+### Archivo 1: `docs/MANUAL_DE_INSTALACION.md`
+Tono: Técnico, instructivo paso a paso. En español.
+
+**Estructura requerida:**
+1. Requisitos del sistema (hardware mínimo/recomendado, software: Docker 24+, Python 3.10+, Node 20+, Git)
+2. Despliegue con Docker (recomendado)
+   - Clonar repo
+   - Configurar variables de entorno (listar TODAS las variables del backend/app/config.py: MODEL_PATHs, FILE_IDs, JWT_SECRET_KEY, ADMIN_USERNAME/PASSWORD, FRONTEND_URL, ENVIRONMENT, LOG_LEVEL, APPLY_CLAHE, PREDICTION_THRESHOLD, MAX_FILE_SIZE_MB, RATE_LIMIT_PREDICT, RATE_LIMIT_DEFAULT, HISTORY_MAX_ITEMS, WISCONSIN_DEFAULTS)
+   - Colocar modelos entrenados en backend/models/ (3 archivos: CNN .keras, Ensemble .keras, XGBoost .pkl)
+   - docker-compose up --build
+   - Verificar: localhost:3000 (frontend), localhost:8000/health (backend), localhost:8000/docs (Swagger)
+3. Despliegue manual (sin Docker, para desarrollo)
+   - Backend: python -m venv, pip install -r requirements.txt, uvicorn app.main:app --reload
+   - Frontend: npm install, npm run dev (Vite :5173)
+   - Training Dashboard: cd training, pip install -r requirements.txt, streamlit run app.py (:8501)
+4. Configuración de autenticación
+   - Por defecto: admin / admin123
+   - Cambiar via ADMIN_USERNAME y ADMIN_PASSWORD
+   - JWT_SECRET_KEY: cambiarla en producción
+5. Despliegue en producción
+   - Backend en Render: Web Service con Docker, puerto 8000, subir modelos como artefacto
+   - Frontend en Vercel: root directory = frontend, build command = npm run build, output = dist
+   - Variables de entorno necesarias en cada plataforma
+6. Obtención de modelos entrenados
+   - Desde Google Colab: ejecutar el notebook, descargar de Resultados/
+   - Desde Google Drive: configurar FILE_IDs en .env
+   - Desde Streamlit Dashboard: entrenar RF/XGBoost y guardar
+7. Solución de problemas (tabla)
+
+**Nombres de archivos de modelo actualizados:**
+- `backend/models/cnn_efficientnet_*.keras` (CNN)
+- `backend/models/ensemble_*.keras` (Ensemble)
+- `backend/models/tabular_*.pkl` (XGBoost)
+- (Los wildcard * representan timestamps YYYYMMDD_HHMMSS)
+
+---
+
+### Archivo 2: `docs/MANUAL_DE_USUARIO.md`
+Tono: Usuario final, claro, con capturas de pantalla (describir qué debe mostrar cada una). En español.
+
+**Estructura requerida:**
+1. Introducción (herramienta de APOYO, no reemplaza al especialista)
+2. Acceso al sistema
+   - URL local vs producción
+   - Inicio de sesión (usuario/contraseña con JWT)
+   - Credenciales por defecto: admin / admin123
+3. Interfaz de usuario
+   - **Login**: formulario de inicio de sesión con token persistente
+   - **Header**: logo BC, título, botón modo claro/oscuro, menú de usuario (Dashboard, Cerrar sesión)
+   - **Hero**: banner de bienvenida con descargo de responsabilidad
+   - **UploadPanel**: drag & drop o clic, JPG/PNG hasta 5MB, vista previa
+   - **ClinicalForm**: 4 campos requeridos (Assessment BI-RADS 0-6, Subtlety 1-5, Edad, Densidad 1-4) + sección colapsable de 30 campos Wisconsin pre-rellenados con medias del dataset
+   - **ResultPanel**: tabla con los 5 modelos, cada uno muestra diagnóstico (Benigno/Maligno), probabilidades, confianza, tiempo de proceso, estado; badge de consenso (Consenso total / Mayoría / Sin consenso); barra ConfidenceGauge (verde/rojo); advertencia si confianza < 65%; botón Reintentar
+   - **Dashboard**: página protegida con estadísticas (total diagnósticos, malignos, benignos, estado API) + tabla de historial
+   - **HistoryList**: lista de últimos diagnósticos con botón Limpiar
+   - **HelpChatbot**: asistente flotante con preguntas frecuentes (FAQ), entrada de texto y entrada por voz (SpeechRecognition), respuestas con texto-a-voz (TTS), 30+ temas
+   - **Footer**: disclaimer legal
+4. Flujo de uso completo
+   - 1. Iniciar sesión
+   - 2. Subir mamografía (automáticamente inicia el análisis)
+   - 3. Opcional: llenar datos clínicos para activar más modelos
+   - 4. Ver resultado con consenso y desglose por modelo
+   - 5. Revisar historial
+5. Interpretación de resultados
+   - Tabla de campos del JSON de respuesta (prediction_id, filename, timestamp, consensus, models[], label, confidence, probabilities, processing_time_ms, warning)
+   - Significado de los niveles de consenso
+   - Cuándo aparecen advertencias
+6. Dashboard de administración
+   - Estadísticas: total, malignos, benignos, estado API
+   - Tabla de historial completo
+7. API REST (para desarrolladores)
+   - `GET /` : información del servicio
+   - `GET /health` : estado de salud y modelos cargados
+   - `POST /predict` : predicción completa
+   - `GET /history` : historial de predicciones
+   - `DELETE /history` : limpiar historial
+   - `POST /auth/login` : autenticación JWT
+   - `GET /auth/me` : usuario actual (requiere token)
+   - Incluir schemas de request/response para cada uno
+8. Solución de problemas (tabla)
+
+---
+
+### Archivo 3: `docs/DIAGRAMAS.md`
+Contiene todos los diagramas Mermaid. Un solo archivo con secciones.
+
+#### 3.1 Diagrama de Arquitectura (graph TB)
+Mostrar:
+- Cliente (navegador)
+- Frontend (React + Nginx) en Vercel/localhost:3000
+- Backend (FastAPI + Uvicorn) en Render/localhost:8000
+- Módulos internos del backend: main.py (endpoints), config.py, schemas.py, auth.py (JWT), security.py (validación uploads), model_handler.py (5 modelos), download_models.py (Google Drive), logging_config.py
+- Almacenamiento: backend/models/ (CNN .keras, Ensemble .keras, XGBoost .pkl)
+- Training Dashboard (Streamlit) en :8501 con 7 views y 10 modules
+- Google Colab (entrenamiento CNN) con Google Drive
+- GitHub (control de versiones) + GitHub Actions (CI/CD)
+- Flechas: HTTP/HTTPS entre componentes, Docker Volumes para modelos
+
+#### 3.2 Diagrama de Modelo de Datos (classDiagram)
+Mostrar clases Pydantic de backend/app/schemas.py:
+- `PredictionResponse` (prediction_id, filename, timestamp, consensus, models[], label, confidence, probabilities, processing_time_ms, warning)
+- `ModelResult` (model_name, model_label, confidence, benign_prob, malignant_prob, processing_time_ms, status, error)
+- `PredictionProbabilities` (benign, malignant)
+- `HistoryItem` (prediction_id, filename, label, confidence, timestamp)
+- `HistoryResponse` (total, items[])
+- `HealthResponse` (status, models_loaded{}, model_path, uptime_seconds, version, environment)
+- `ErrorResponse` (error, detail)
+Relaciones: PredictionResponse → PredictionProbabilities, PredictionResponse → ModelResult[], HistoryResponse → HistoryItem[]
+
+#### 3.3 Diagrama de Componentes (graph TB)
+Subgrafos por capa:
+
+**Frontend React:**
+- App.jsx (state machine: login/home/dashboard, maneja file, clinicalData, result, status, token)
+- Componentes: Login, Header, Hero, UploadPanel, ClinicalForm, ResultPanel, ConfidenceGauge, HistoryList, Dashboard, HelpChatbot, Spinner, Tooltip, Footer
+- Hooks: useDarkMode, useHistory
+- api.js (fetch wrapper con class ApiError)
+- Conexiones: App → cada componente, ResultPanel → ConfidenceGauge, hooks → api.js
+
+**Backend FastAPI:**
+- main.py (lifespan, endpoints, middleware, compute_consensus)
+- config.py (Settings, variables de entorno)
+- auth.py (JWT create/verify, get_current_user, require_user)
+- security.py (validate_upload_image: content-type, extension, size)
+- schemas.py (Pydantic models)
+- model_handler.py (ModelHandler: load, predict_all, 5 modelos)
+- download_models.py (gdown con retry)
+- logging_config.py
+
+**Training Streamlit:**
+- app.py (multipage, auth, i18n, theme toggle)
+- modules/: auth.py, eda.py, models.py, cross_validation.py, hyperparameter_tuning.py, statistical_tests.py, visualization.py, reports.py, i18n.py
+- views/: 01_Dashboard.py, 02_EDA.py, 03_Models.py, 04_Results.py, 05_TuningResults.py, 06_StatisticalTests.py, 07_Reports.py
+
+**Infraestructura:**
+- Docker Compose (3 servicios, red cancer-mama-net, volúmenes)
+- GitHub Actions (lint, test, deploy a Render + Vercel)
+
+#### 3.4 Diagramas de Secuencia (sequenceDiagram)
+
+**4.4.1 Flujo de Autenticación**
+Actor Usuario → Frontend Login → api.js → POST /auth/login → Backend → auth.py (verify_password, create_access_token) → Respuesta JWT → Frontend almacena en localStorage → Redirige a home
+
+**4.4.2 Flujo de Predicción Completo**
+Actor Usuario → UploadPanel (drag & drop) → App.jsx (validateClinical) → api.js (predictImage con FormData: file + clinical + wisconsin) → POST /predict → Backend security.py (validate_upload_image) → model_handler.predict_all(raw_bytes, clinical_data, wisconsin_data) → Ejecuta 5 modelos (CNN, Ensemble, XGBoost, CNN+RF, CNN+XGBoost) → compute_consensus → guarda en history deque → PredictionResponse JSON → Frontend ResultPanel + ConfidenceGauge + HistoryList
+
+**4.4.3 Flujo de Health Check**
+Frontend al cargar página → GET /health → Backend verifica models_loaded → Responde HealthResponse → Frontend habilita/deshabilita UI
+
+**4.4.4 Flujo de Dashboard**
+Usuario → Header "Dashboard" → Frontend Dashboard → fetchHistory + checkHealth → GET /history + GET /health → Renderiza stats cards + tabla historial
+
+**4.4.5 Flujo de HelpChatbot**
+Usuario abre chatbot → escribe o usa voz (SpeechRecognition) → findAnswer() busca keywords en FAQ[] → responde con texto + TTS (SpeechSynthesis)
+
+**4.4.6 Flujo de Entrenamiento (Streamlit)**
+Usuario autenticado → selecciona página → exec(open(view)) → cada view usa módulos (eda, models, cv, tuning, stats, reports) → genera figuras Plotly → guarda modelos .pkl → exporta PDF/Word/Excel
+
+#### 3.5 Diagramas de Estado (stateDiagram-v2)
+
+**3.5.1 Estados de la Aplicación (App.jsx)**
+- `login` → usuario no autenticado, muestra Login + HelpChatbot
+- `home` → autenticado, muestra UI principal (Upload, ClinicalForm, ResultPanel, HistoryList)
+- `dashboard` → autenticado, muestra Dashboard + HelpChatbot
+- Sub-estados de home: idle → loading (sube imagen) → success (resultado) / error (fallo) → idle / loading
+
+**3.5.2 Estados del Modelo (model_handler.py)**
+- `not_loaded` → startup del lifespan
+- `loading_model` → load() descarga de Google Drive o carga local
+- `loaded` → listo para predict
+- `predicting` → predict_all ejecutando modelos
+- `error` → falló la carga
+- Transiciones: not_loaded → loading_model → loaded/predicting/error → shutdown
+
+**3.5.3 Estados del Historial (deque en memoria)**
+- `empty` → sin predicciones
+- `populated` → con 1-49 items
+- `full` → 50 items (FIFO: nuevo reemplaza al más antiguo)
+- Transiciones: empty → POST /predict → populated → POST /predict → full; cualquier estado → DELETE /history → empty
+
+**3.5.4 Estados de Autenticación**
+- `unauthenticated` → sin token
+- `authenticated` → token válido en localStorage
+- `token_expired` → JWT expirado (redirige a login)
+- Transiciones: unauthenticated → login exitoso → authenticated; authenticated → logout/token expirado → unauthenticated
+
+**3.5.5 Estados del Upload/Análisis**
+- `idle` → esperando imagen
+- `validating` → cliente valida tipo/tamaño
+- `uploading` → enviando a backend
+- `processing` → backend ejecutando modelos
+- `success` → resultado recibido
+- `error` → fallo (red/API/validación)
+- Transiciones con retry y clear
+
+---
+
+### Archivo 4: `docs/MANUAL_GOOGLE_DRIVE_MODELOS.md`
+Actualizar para reflejar:
+- 3 archivos de modelo (no 1): CNN .keras, Ensemble .keras, XGBoost .pkl
+- IDs de archivo en Google Drive configurados via variables de entorno
+- Mecanismo de descarga con gdown y 3 reintentos
+- Fallback a archivo local si no hay FILE_ID
+- Cómo subir modelos a Drive y obtener FILE_IDs
+
+### Archivo 5: `docs/REPORTE_MODELOS.md`
+Actualizar para reflejar los 5 modelos actuales:
+- RF, XGBoost, CNN, CNN+RF, CNN+XGBoost
+- Métricas de cada uno (accuracy, precision, recall, f1, AUC)
+- Resultados de validación cruzada (5 folds)
+- Hiperparámetros óptimos
+- Pruebas estadísticas (McNemar, Wilcoxon, Friedman, Nemenyi, DeLong)
+- Comparativa y recomendación de mejor modelo
+
+---
+
+## 3. DIAGRAMAS MERMAID - NOTAS TÉCNICAS
+
+- Usar bloques ` ```mermaid ` y ` ``` ` para cada diagrama.
+- Numerar diagramas: 1. Arquitectura, 2. Modelo de Datos, 3. Componentes, 4. Secuencia (4.1 a 4.6), 5. Estados (5.1 a 5.5).
+- En graph TB, usar `subgraph` para agrupar por capa.
+- En sequenceDiagram, usar `actor`, `participant`, `alt/else` para condiciones.
+- En stateDiagram-v2, usar estados compuestos con `state` para sub-estados.
+- En classDiagram, incluir tipos de campos (str, float, bool, etc.) y relaciones.
+
+## 4. FORMATO GENERAL
+
+- Todos los archivos en **Markdown (.md)** excepto el prompt (.txt)
+- Idioma: **Español**
+- Tablas con `|` pipes
+- Código con ` ``` ` (bash, python, javascript, env, json)
+- Todos los nombres de variables, endpoints, componentes en **cursiva** o `código`
+- Incluir sección de "Solución de problemas" al final de cada manual
+- No usar emojis en exceso (solo los necesarios para claridad)
+
+## 5. GAPS CRÍTICOS A CUBRIR (VERIFICAR CONTRA CÓDIGO)
+
+1. Autenticación JWT (Login + /auth/login + /auth/me) - AUSENTE en docs actuales
+2. 5 modelos con consenso (docs actuales muestran 1 modelo)
+3. ClinicalForm con 34 campos (4 clínicos + 30 Wisconsin) - AUSENTE
+4. HelpChatbot con voz y TTS (405 líneas) - AUSENTE
+5. Dashboard protegido con estadísticas - AUSENTE
+6. 7 endpoints API (docs actuales solo tienen 3)
+7. Rate limiting con slowapi - AUSENTE
+8. Middleware de seguridad HTTP - AUSENTE
+9. Los híbridos (CNN+RF, CNN+XGBoost) actualmente devuelven valores fijos - DOCUMENTAR como placeholders
+10. Training Dashboard con 7 vistas y 10 módulos - AUSENTE

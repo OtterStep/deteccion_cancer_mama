@@ -188,6 +188,17 @@ if metricas:
         legend_title_text=get_translation(lang, "statistical_tests.model_col"),
     )
     st.plotly_chart(fig, use_container_width=True)
+    st.info(
+        "**Interpretación de la comparativa porcentual:**  \n"
+        "En escala porcentual se aprecia claramente la **brecha** entre modelos tabulares "
+        "(>95% en todas las métricas) y modelos de imagen (~60% en Accuracy).  \n"
+        "**Random Forest** lidera con el Score Compuesto más alto, seguido muy de cerca por "
+        "**XGBoost** (diferencia no significativa, p = 1.0 en McNemar).  \n"
+        "Los modelos **híbridos (CNN+RF y CNN+XGBoost)** muestran un rendimiento intermedio "
+        "con Accuracy ~62%, superando a CNN pura pero lejos de los tabulares.  \n"
+        "**CNN (EfficientNet)** tiene el rendimiento más bajo (AUC = 0.56), lo cual es esperable "
+        "dado que clasifica la imagen completa sin segmentación de la región de interés."
+    )
 
 st.divider()
 
@@ -235,6 +246,19 @@ if resumen:
         )
         fig_heat.update_layout(margin=dict(t=40))
         st.plotly_chart(fig_heat, use_container_width=True)
+        st.info(
+            "**Interpretación del mapa de calor (McNemar):**  \n"
+            "Las celdas en tonos **azules/verdes** (p < 0.05) indican diferencias estadísticamente "
+            "significativas entre las predicciones de dos modelos.  \n"
+            "Se observa que **CNN (EfficientNet)** difiere significativamente de los modelos "
+            "híbridos (p < 0.005 con Bonferroni), consistente con su menor rendimiento.  \n"
+            "**Random Forest** y **XGBoost** no muestran diferencias significativas entre sí "
+            "(p = 1.0), lo que sugiere que ambos modelos tabulares tienen rendimiento comparable "
+            "en este dataset.  \n"
+            "Las celdas en gris claro indican valores > 0.05 (diferencias no significativas).  \n"
+            "**Nota:** Los pares entre grupos (tabular vs imagen) no tienen p-valor porque operan "
+            "sobre conjuntos de datos diferentes (Wisconsin vs mamografías)."
+        )
 
     # Interpretación general
     if resumen:
@@ -277,6 +301,21 @@ st.divider()
 # 6. CONCLUSIONES
 # ──────────────────────────────────────────────
 st.subheader(get_translation(lang, "statistical_tests.conclusions_title"))
+
+ranking_data = data.get("ranking_modelos", {})
+best_model_key = ranking_data.get("mejor_modelo", "")
+best_model_name = format_model_name(best_model_key) if best_model_key else "N/A"
+
+st.success(
+    f"**Conclusión general:** El mejor modelo del sistema es **{best_model_name}**, "
+    f"con un Score Compuesto de **{ranking_data['tabla'][0]['Score compuesto']:.4f}** "
+    f"(AUC = {ranking_data['tabla'][0]['auc']:.4f}, F1 = {ranking_data['tabla'][0]['f1']:.4f}).  \n"
+    "Los modelos tabulares superan ampliamente a los basados en imagen, lo que sugiere que "
+    "las 30 características morfológicas del núcleo celular (Wisconsin) tienen mayor poder "
+    "discriminativo que las mamografías completas sin segmentación.  \n"
+    "Para producción, se recomienda usar **Random Forest** o **XGBoost** como modelo principal, "
+    "y reservar los modelos de imagen para casos donde no se disponga de datos tabulares."
+)
 
 conc_col1, conc_col2 = st.columns(2)
 
