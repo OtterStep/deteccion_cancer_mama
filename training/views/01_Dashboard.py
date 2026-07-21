@@ -15,10 +15,10 @@ lang = st.session_state.get("language", "es")
 MODEL_CATEGORIES = [
     ("CNN (EfficientNet)", ["cnn_efficientnet_", "best_cnn_efficientnet"], [".keras", ".h5"]),
     ("Ensemble (CNN+Clínico)", ["ensemble_"], [".keras"]),
-    ("Hybrid CNN-RF Extractor", ["hybrid_cnn_rf_extractor_"], [".keras"]),
-    ("Hybrid CNN-RF Classifier", ["hybrid_cnn_rf_classifier_"], [".pkl"]),
-    ("Tabular (XGBoost)", ["tabular_"], [".pkl"]),
-    ("Tabular (RF)", ["rf_tabular_"], [".pkl"]),
+    ("Hybrid CNN-RF Extractor", ["extractor_hibrid_rf_cnn", "hybrid_cnn_rf_extractor_"], [".keras"]),
+    ("Hybrid CNN-RF Classifier", ["classifier_hibrid_rf_cnn", "hybrid_cnn_rf_classifier_"], [".pkl"]),
+    ("Tabular (XGBoost)", ["tabular_xgboost_", "tabular_"], [".pkl"]),
+    ("Tabular (RF)", ["tabular_rf_", "rf_tabular_"], [".pkl"]),
 ]
 
 
