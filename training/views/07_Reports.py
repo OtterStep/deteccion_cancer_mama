@@ -17,7 +17,7 @@ from modules.visualization import (
     generate_confusion_matrix_fig, generate_roc_curve_fig,
     generate_metrics_bar_fig, generate_cv_bar_fig,
 )
-from modules.reports import generate_pdf, generate_word, generate_excel
+from modules.reports import generate_pdf
 from modules.i18n import get_translation
 
 
@@ -133,20 +133,12 @@ if st.button(get_translation(lang, "reports.run_pipeline"), type="primary", use_
         generate_pdf(results, [cv_xgb, cv_rf], tuning, stats_df, eda_summary, figures, pdf_path)
         st.success(get_translation(lang, "reports.pdf_success", path=pdf_path))
 
-        word_path = str(RESULTS_DIR / f"reporte_modelos_{timestamp}.docx")
-        generate_word(results, [cv_xgb, cv_rf], tuning, stats_df, eda_summary, figures, word_path)
-        st.success(get_translation(lang, "reports.word_success", path=word_path))
-
-        excel_path = str(RESULTS_DIR / f"reporte_modelos_{timestamp}.xlsx")
-        generate_excel(results, [cv_xgb, cv_rf], tuning, stats_df, eda_summary, excel_path)
-        st.success(get_translation(lang, "reports.excel_success", path=excel_path))
-
         st.balloons()
 
     st.subheader(get_translation(lang, "reports.generated_reports"))
 
     for label, path in [
-        ("PDF", pdf_path), ("Word (DOCX)", word_path), ("Excel (XLSX)", excel_path)
+        ("PDF", pdf_path)
     ]:
         p = Path(path)
         if p.exists():

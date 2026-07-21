@@ -67,7 +67,7 @@ def generate_pdf(
     elements.append(Spacer(1, 12))
 
     if "pathology" in figures:
-        img = Image(figures["pathology"], width=400, height=200)
+        img = Image(io.BytesIO(figures["pathology"]), width=400, height=200)
         elements.append(img)
         elements.append(Spacer(1, 12))
 
@@ -107,17 +107,17 @@ def generate_pdf(
     for name in results:
         if f"cm_{name}" in figures:
             elements.append(Paragraph(f"Matriz de Confusión - {name}", styles["SubTitle2"]))
-            elements.append(Image(figures[f"cm_{name}"], width=280, height=240))
+            elements.append(Image(io.BytesIO(figures[f"cm_{name}"]), width=280, height=240))
             elements.append(Spacer(1, 8))
 
     if "roc" in figures:
         elements.append(Paragraph("Curvas ROC", styles["SubTitle2"]))
-        elements.append(Image(figures["roc"], width=400, height=300))
+        elements.append(Image(io.BytesIO(figures["roc"]), width=400, height=300))
         elements.append(Spacer(1, 12))
 
     if "metrics_bar" in figures:
         elements.append(Paragraph("Comparación de Métricas", styles["SubTitle2"]))
-        elements.append(Image(figures["metrics_bar"], width=400, height=260))
+        elements.append(Image(io.BytesIO(figures["metrics_bar"]), width=400, height=260))
         elements.append(Spacer(1, 12))
 
     # 3. Cross-Validation
@@ -151,7 +151,7 @@ def generate_pdf(
             elements.append(Spacer(1, 10))
 
             if f"cv_{cv['model_name']}" in figures:
-                elements.append(Image(figures[f"cv_{cv['model_name']}"], width=380, height=220))
+                elements.append(Image(io.BytesIO(figures[f"cv_{cv['model_name']}"]), width=380, height=220))
                 elements.append(Spacer(1, 8))
 
     # 4. Hyperparameter Tuning
