@@ -242,9 +242,7 @@
         "p-valor (t-pareada)": 1.27e-5,
         "p-valor (Wilcoxon)": 0.0625,
         "Significativo (Bonferroni)": true
-      },
-      ...
-    ]
+      }]
   },
   "ranking_modelos": {
     "orden": ["tabular_rf", "tabular_xgboost", "hybrid_cnn_rf", "hybrid_cnn_xgb", "cnn_efficientnet"],
@@ -262,9 +260,7 @@
         "CV Accuracy (std)": 0.0102,
         "CV AUC (media)": 0.9895,
         "CV F1 (media)": 0.9382
-      },
-      ...
-    ],
+      }],
     "mejor_modelo": "tabular_rf"
   },
   "archivos_modelo_en_disco": {
